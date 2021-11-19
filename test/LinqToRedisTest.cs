@@ -79,7 +79,7 @@ namespace UniSpy.Redis.Test
 
             for (int i = 0; i < 100; i++)
             {
-                var key = new NatNegKey
+                var key = new NatNegUserInfo
                 {
                     Cookie = i,
                     ServerID = new Guid()
