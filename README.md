@@ -11,7 +11,7 @@ The example will show below.
 
 # Example code
 ```    
-    public record NatNegUserInfo : RedisKeyValueObject
+    public record UserInfo : RedisKeyValueObject
     {
         [RedisKey]
         public Guid? ServerID { get; set; }
@@ -22,7 +22,7 @@ The example will show below.
     }
 
 
-    internal class RedisClient : UniSpyServer.LinqToRedis.RedisClient<NatNegUserInfo>
+    internal class RedisClient : UniSpyServer.LinqToRedis.RedisClient<UserInfo>
     {
         public RedisClient() : base("127.0.0.1:6789", 0)
         {
@@ -31,7 +31,7 @@ The example will show below.
 ```
 Then you can use the general way to query from redis.
 ```
-    var key = new NatNegKey{ Cookie=1 };
+    var key = new UserInfo{ Cookie=1 };
     var client = new RedisClient();
     var results1 = client.GetValue(key);
     var results2 = client[key];

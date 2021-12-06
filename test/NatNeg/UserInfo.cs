@@ -3,7 +3,7 @@ using UniSpyServer.LinqToRedis;
 
 namespace UniSpy.Redis.Test
 {
-    public record NatNegUserInfo : RedisKeyValueObject
+    public record UserInfo : RedisKeyValueObject
     {
         [RedisKey]
         public Guid? ServerID { get; set; }
