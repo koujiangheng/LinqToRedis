@@ -27,6 +27,10 @@ namespace UniSpyServer.LinqToRedis
             _provider = new RedisQueryProvider<TValue>(this);
             Values = new QueryableObject<TValue>(_provider);
         }
+        public bool DeleteKeyValue(TValue key)
+        {
+            return Db.KeyDelete(key.FullKey);
+        }
         public List<TValue> GetValues(TValue key)
         {
             return GetKeyValues(key).Values.ToList();
