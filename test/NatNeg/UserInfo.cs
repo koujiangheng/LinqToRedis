@@ -5,7 +5,7 @@ namespace UniSpy.Redis.Test
 {
     public record UserInfo : RedisKeyValueObject
     {
-        public NatNegUserInfo() : base(TimeSpan.FromMinutes(3))
+        public UserInfo() : base(TimeSpan.FromMinutes(3))
         {
             // we set the expire time to 3 minutes
         }
