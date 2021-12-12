@@ -9,8 +9,9 @@ namespace UniSpyServer.LinqToRedis
 {
     public abstract record RedisKeyValueObject : IRedisKey
     {
-        public RedisKeyValueObject()
+        public RedisKeyValueObject(TimeSpan? expireTime)
         {
+            ExpireTime = expireTime;
         }
         [JsonIgnore]
         private static List<Type> _supportedTypes = new List<Type>
@@ -35,7 +36,7 @@ namespace UniSpyServer.LinqToRedis
             typeof(Enum)
         };
         [JsonIgnore]
-        public TimeSpan? ExpireTime { get; set; }
+        public TimeSpan? ExpireTime { get; private set; }
         [JsonIgnore]
         public string FullKey => BuildFullKey();
         [JsonIgnore]
