@@ -24,7 +24,7 @@ namespace UniSpy.Redis.Test
         public void WriteTest1()
         {
             var redis = new RedisClient();
-            var value = new NatNegUserInfo
+            var value = new UserInfo
             {
                 Cookie = 0,
                 ServerID = new Guid(),
@@ -41,7 +41,7 @@ namespace UniSpy.Redis.Test
 
             for (int i = 0; i < 100; i++)
             {
-                var value = new NatNegUserInfo
+                var value = new UserInfo
                 {
                     Cookie = 0,
                     ServerID = new Guid(),
@@ -58,7 +58,7 @@ namespace UniSpy.Redis.Test
 
             for (int i = 0; i < 100; i++)
             {
-                var value = new NatNegUserInfo
+                var value = new UserInfo
                 {
                     Cookie = 0,
                     ServerID = new Guid(),
@@ -79,7 +79,7 @@ namespace UniSpy.Redis.Test
 
             for (int i = 0; i < 100; i++)
             {
-                var key = new NatNegUserInfo
+                var key = new UserInfo
                 {
                     Cookie = i,
                     ServerID = new Guid()

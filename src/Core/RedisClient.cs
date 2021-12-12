@@ -8,7 +8,7 @@ using System;
 
 namespace UniSpyServer.LinqToRedis
 {
-    public class RedisClient<TValue> where TValue : RedisKeyValueObject
+    public class RedisClient<TValue> : IDisposable where TValue : RedisKeyValueObject
     {
         public ConnectionMultiplexer Multiplexer { get; private set; }
         public IDatabase Db { get; private set; }
@@ -23,13 +23,6 @@ namespace UniSpyServer.LinqToRedis
         public RedisClient(string connectionString, int db)
         {
             Multiplexer = ConnectionMultiplexer.Connect(connectionString);
-            Db = Multiplexer.GetDatabase(db);
-            _provider = new RedisQueryProvider<TValue>(this);
-            Values = new QueryableObject<TValue>(_provider);
-        }
-        public RedisClient(ConnectionMultiplexer multiplexer, int db)
-        {
-            Multiplexer = multiplexer;
             Db = Multiplexer.GetDatabase(db);
             _provider = new RedisQueryProvider<TValue>(this);
             Values = new QueryableObject<TValue>(_provider);
@@ -93,5 +86,10 @@ namespace UniSpyServer.LinqToRedis
             get => GetValue(key);
             set => SetValue(value);
         }
+        public void Dispose()
+        {
+            Multiplexer.Dispose();
+        }
+
     }
 }
