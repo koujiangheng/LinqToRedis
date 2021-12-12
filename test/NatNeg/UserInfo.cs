@@ -14,6 +14,7 @@ namespace UniSpy.Redis.Test
         [RedisKey]
         public int? Cookie { get; set; }
         public string UserName { get; set; }
+        [RedisKey]
         public string RemoteEndPoint { get; set; }
     }
 }

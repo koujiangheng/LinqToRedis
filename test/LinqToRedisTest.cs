@@ -28,7 +28,7 @@ namespace UniSpy.Redis.Test
             {
                 Cookie = 0,
                 ServerID = new Guid(),
-                UserName = "hello2",
+                UserName = "hello0",
                 RemoteEndPoint = "127.0.0.1:7890"
             };
 
@@ -46,7 +46,7 @@ namespace UniSpy.Redis.Test
                     Cookie = 0,
                     ServerID = new Guid(),
                     UserName = "hello2",
-                    RemoteEndPoint = "127.0.0.1:7890"
+                    RemoteEndPoint = $"127.0.0.1:{i}"
                 };
                 redis.SetValue(value);
             }
@@ -63,7 +63,7 @@ namespace UniSpy.Redis.Test
                     Cookie = 0,
                     ServerID = new Guid(),
                     UserName = "hello2",
-                    RemoteEndPoint = "127.0.0.1:7890"
+                    RemoteEndPoint = $"127.0.0.1:{i}"
                 };
                 // you can directly using value object to set value
                 redis[value] = value;

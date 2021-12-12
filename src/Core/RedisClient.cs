@@ -10,6 +10,7 @@ namespace UniSpyServer.LinqToRedis
 {
     public class RedisClient<TValue> : IDisposable where TValue : RedisKeyValueObject
     {
+        public TimeSpan? ExpireTime { get; private set; }
         public ConnectionMultiplexer Multiplexer { get; private set; }
         public IDatabase Db { get; private set; }
         private EndPoint[] _endPoints => Multiplexer.GetEndPoints();
@@ -58,23 +59,28 @@ namespace UniSpyServer.LinqToRedis
             }
             return dict;
         }
-        public bool UpdateValue(TValue value)
-        {
-            var keys = GetMatchedKeys(value);
-            if (keys.Count != 1)
-            {
-                throw new System.Exception("Update value failed, key not found or more than one key found");
-            }
-            return Db.StringSet(keys.First(), JsonConvert.SerializeObject(value));
-        }
+        // public bool UpdateValue(TValue value)
+        // {
+        //     var keys = GetMatchedKeys(value);
+        //     if (keys.Count != 1)
+        //     {
+        //         throw new System.Exception("Update value failed, key not found or more than one key found");
+        //     }
+        //     return Db.StringSet(keys.First(), JsonConvert.SerializeObject(value));
+        // }
         public bool SetValue(TValue value)
         {
-            var keys = GetMatchedKeys(value);
-            if (keys.Count != 0)
+            // var keys = GetMatchedKeys(value);
+            // if (keys.Count != 0)
+            // {
+            //     throw new System.Exception("Set value failed, key already exists");
+            // }
+            var result = Db.StringSet(value.FullKey, JsonConvert.SerializeObject(value));
+            if (value.ExpireTime != null)
             {
-                throw new System.Exception("Set value failed, key already exists");
+                Db.KeyExpire(value.FullKey, value.ExpireTime.Value);
             }
-            return Db.StringSet(value.FullKey, JsonConvert.SerializeObject(value));
+            return result;
         }
         public TValue GetValue(IRedisKey key)
         {
