@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace UniSpyServer.LinqToRedis.Linq
@@ -18,7 +19,18 @@ namespace UniSpyServer.LinqToRedis.Linq
             var builder = new RedisQueryBuilder<TValue>(expression);
             builder.Build();
             var values = _client.GetValues(builder.KeyObject);
-            return values;
+            var node = (MethodCallExpression)expression;
+            switch (node.Method.Name)
+            {
+                case "Where":
+                    return values;
+                case "FirstOrDefault":
+                    return values.FirstOrDefault();
+                case "First":
+                    return values.First();
+                default:
+                    throw new NotSupportedException(string.Format("The method '{0}' is not supported", node.Method.Name));
+            }
         }
     }
 }

@@ -43,15 +43,23 @@ namespace UniSpyServer.LinqToRedis.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-
-            if (node.Method.DeclaringType != typeof(Queryable) && node.Method.Name == "Where")
+            switch (node.Method.Name)
             {
-                throw new NotSupportedException(string.Format("The method '{0}' is not supported", node.Method.Name));
+                case "Where":
+                    Visit(node.Arguments[1]);
+                    break;
+                case "FirstOrDefault":
+                    Visit(node.Arguments[0]);
+                    break;
+                case "First":
+                    Visit(node.Arguments[0]);
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("The method '{0}' is not supported", node.Method.Name));
             }
 
             return node;
         }
-
         protected override Expression VisitMember(MemberExpression node)
         {
 
