@@ -67,7 +67,7 @@ namespace UniSpyServer.LinqToRedis.Linq
             // every property that queries must have RedisKeyAttribute
 
             var property = node.Member.DeclaringType.GetProperty(node.Member.Name);
-            if (property.GetCustomAttributes(typeof(RedisKeyAttribute), false).Count() != 1)
+            if (property.GetCustomAttributes(typeof(RedisKeyAttribute), true).Count() != 1)
             {
                 throw new NotSupportedException($"The property: {node.Member.Name} is not key, please use the property with RedisKeyAttribute or add RedisKeyAttribute to this property.");
             }

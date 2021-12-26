@@ -42,7 +42,9 @@ namespace UniSpyServer.LinqToRedis.Linq
         public Type ElementType => typeof(T);
         public Expression Expression => _expression;
         public IQueryProvider Provider => _provider;
+
         public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)_provider.Execute(_expression)).GetEnumerator();
+
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 }

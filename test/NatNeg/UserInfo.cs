@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using UniSpyServer.LinqToRedis;
 
 namespace UniSpy.Redis.Test
@@ -10,6 +11,7 @@ namespace UniSpy.Redis.Test
             // we set the expire time to 3 minutes
         }
         [RedisKey]
+        [JsonProperty(Order = -2)]
         public Guid? ServerID { get; set; }
         [RedisKey]
         public int? Cookie { get; set; }
