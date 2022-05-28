@@ -3,7 +3,7 @@ This small tool will give you the power to query redis key value data with Linq
 This project is inspired by UniSpyServer
 
 # Usage
-The example will show below.
+The example is shown below.
 1. You need to create your class inherent from RedisKeyValueObject
 2. Define some properties with \[RedisKey\] attribute
 3. Create your own class which inherent from RedisClient<>, remember to specify the database

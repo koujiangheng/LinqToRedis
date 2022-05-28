@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace UniSpyServer.LinqToRedis.Linq
 {
@@ -13,25 +12,38 @@ namespace UniSpyServer.LinqToRedis.Linq
     public class RedisQueryBuilder<TKey> : ExpressionVisitor where TKey : RedisKeyValueObject
     {
         public TKey KeyObject { get; private set; }
-        private List<object> _builderStack;
+        private List<object> _builderStack = new List<object>();
         private Expression _expression;
         public RedisQueryBuilder(Expression expression)
         {
             _expression = expression;
-            _builderStack = new List<object>();
         }
 
         public void Build()
         {
             KeyObject = (TKey)Activator.CreateInstance(typeof(TKey));
             Visit(_expression);
-
             for (int i = 0; i < _builderStack.Count; i += 2)
             {
                 var keyProperty = KeyObject.GetType().GetProperty((string)_builderStack[i]);
-                keyProperty.SetValue(KeyObject, _builderStack[i + 1]);
+                // get target type
+                var targetType = IsNullableType(keyProperty.PropertyType) ? Nullable.GetUnderlyingType(keyProperty.PropertyType) : keyProperty.PropertyType;
+                // convert value to target type
+                var value = _builderStack[i + 1];
+                // _builderStack[i + 1] = Convert.ChangeType(_builderStack[i + 1], targetType);
+                if (targetType.IsEnum)
+                {
+                    value = Enum.ToObject(targetType, value);
+                }
+                else
+                {
+                    value = Convert.ChangeType(value, targetType);
+                }
+                keyProperty.SetValue(KeyObject, value);
             }
         }
+        private static bool IsNullableType(Type type) => type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
+
         private static Expression StripQuotes(Expression node)
         {
             while (node.NodeType == ExpressionType.Quote)
@@ -48,11 +60,19 @@ namespace UniSpyServer.LinqToRedis.Linq
                 case "Where":
                     Visit(node.Arguments[1]);
                     break;
-                case "FirstOrDefault":
-                    Visit(node.Arguments[0]);
-                    break;
+                case "Count":
                 case "First":
-                    Visit(node.Arguments[0]);
+                case "FirstOrDefault":
+                    if (node.Arguments.Count == 1)
+                    {
+                        // FirstOrDefault() is called at the end of the query
+                        Visit(node.Arguments[0]);
+                    }
+                    else
+                    {
+                        // FirstOrDefault() is called at the start of the query
+                        Visit(node.Arguments[1]);
+                    }
                     break;
                 default:
                     throw new NotSupportedException(string.Format("The method '{0}' is not supported", node.Method.Name));
@@ -60,9 +80,12 @@ namespace UniSpyServer.LinqToRedis.Linq
 
             return node;
         }
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            return base.VisitParameter(node);
+        }
         protected override Expression VisitMember(MemberExpression node)
         {
-
             // we check if property do not have RedisKeyAttribute
             // every property that queries must have RedisKeyAttribute
 
@@ -72,9 +95,9 @@ namespace UniSpyServer.LinqToRedis.Linq
                 throw new NotSupportedException($"The property: {node.Member.Name} is not key, please use the property with RedisKeyAttribute or add RedisKeyAttribute to this property.");
             }
             _builderStack.Add(node.Member.Name);
+
             return node;
         }
-
         protected override Expression VisitBinary(BinaryExpression node)
         {
             Visit(node.Left);
@@ -96,7 +119,6 @@ namespace UniSpyServer.LinqToRedis.Linq
             if (node.Value == null)
             {
                 throw new NotSupportedException("The constant must have value");
-
             }
             _builderStack.Add(node.Value);
             return node;
