@@ -1,6 +1,6 @@
 # LinqToRedis
-This small tool will give you the power to query redis key value data with Linq
-This project is inspired by UniSpyServer
+This small tool will give you the power to query redis key value data with Linq.<br />
+This project is inspired by UniSpyServer.
 
 # Usage
 The example is shown below.
@@ -8,6 +8,11 @@ The example is shown below.
 2. Define some properties with \[RedisKey\] attribute
 3. Create your own class which inherent from RedisClient<>, remember to specify the database
 4. Use (1) GetValue method (2) index access (3) Linq to query from redis
+
+# Note
+1. The linq query buildin only support ==,&&,|| operation, you can not query more complex expression
+2. The properties with \[RedisKey\] attribute are the key used to search on redis, the raw redis query string is build to query from redis
+3. Use LinqToRedis to query simple condition, get the data from redis, then use linq for List<> or Dictionary<> to query more complex data
 
 # Example code
 ```    
