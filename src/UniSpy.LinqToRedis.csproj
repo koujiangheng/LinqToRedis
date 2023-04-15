@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <PackageId>UniSpyServer.LinqToRedis</PackageId>
+    <PackageId>UniSpy.LinqToRedis</PackageId>
     <Version>1.0.4</Version>
     <Authors>xiaojiuwo</Authors>
     <Company>GameProgressive</Company>
@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="RedLock.net" Version="2.3.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.50" />
   </ItemGroup>
 </Project>

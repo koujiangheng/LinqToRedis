@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace UniSpyServer.LinqToRedis.Linq
+namespace UniSpy.LinqToRedis.Linq
 {
     public class QueryableObject<T> : IQueryable<T>
     {
@@ -12,7 +12,7 @@ namespace UniSpyServer.LinqToRedis.Linq
         private Expression _expression;
         public QueryableObject(QueryProviderBase provider)
         {
-            if (provider == null)
+            if (provider is null)
             {
                 throw new ArgumentNullException("provider");
             }
@@ -21,12 +21,12 @@ namespace UniSpyServer.LinqToRedis.Linq
         }
         public QueryableObject(QueryProviderBase provider, Expression expression)
         {
-            if (provider == null)
+            if (provider is null)
             {
                 throw new ArgumentNullException("provider");
             }
 
-            if (expression == null)
+            if (expression is null)
             {
                 throw new ArgumentNullException("expression");
             }

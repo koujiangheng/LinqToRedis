@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace UniSpyServer.LinqToRedis.Linq
+namespace UniSpy.LinqToRedis.Linq
 {
     public class RedisQueryProvider<TValue> : QueryProviderBase where TValue : RedisKeyValueObject
     {
@@ -23,7 +23,8 @@ namespace UniSpyServer.LinqToRedis.Linq
                 return _client.GetKeyValues().Values;
             }
             var node = (MethodCallExpression)expression;
-            if (node.Method.Name == "Count")
+
+            if (node.Method.Name == "Count" && node.Arguments.Count == 1)
             {
                 return _client.GetMatchedKeys().Count;
             }
@@ -33,6 +34,10 @@ namespace UniSpyServer.LinqToRedis.Linq
             var builder = new RedisQueryBuilder<TValue>(expression);
             builder.Build();
 
+            if (node.Method.Name == "Count" && node.Arguments.Count != 1)
+            {
+                return _client.GetMatchedKeys(builder.KeyObject).Count;
+            }
 
             var values = _client.GetValues(builder.KeyObject);
 

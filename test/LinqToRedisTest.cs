@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using UniSpyServer.LinqToRedis;
+using UniSpy.LinqToRedis;
 using Xunit;
 
 namespace UniSpy.Redis.Test
@@ -19,7 +19,7 @@ namespace UniSpy.Redis.Test
         public void PerformaceTest()
         {
             // Given
-            var redis = new RedisClient();
+            var redisClient = new RedisClient();
             var value = new UserInfo
             {
                 Cookie = 0,
@@ -33,32 +33,35 @@ namespace UniSpy.Redis.Test
             var start = System.DateTime.Now;
             for (var i = 0; i < 100; i++)
             {
-                redis.SetValue(value);
+                redisClient.SetValue(value);
+                value.Cookie++;
             }
             Console.WriteLine("linqtoredis sync: {0}", (System.DateTime.Now.Subtract(start).TotalSeconds));
 
             start = System.DateTime.Now;
 
-            Parallel.For(0, 100,
-                               index =>
-                               {
-                                   redis.SetValue(value);
-                               });
+            for (var i = 0; i < 100; i++)
+            {
+                _ = redisClient.SetValueAsync(value);
+                value.Cookie++;
+            }
+            
             Console.WriteLine("linqtoredis async: {0}", (System.DateTime.Now.Subtract(start).TotalSeconds));
             // natural redis api performance
             start = System.DateTime.Now;
             for (var i = 0; i < 100; i++)
             {
-                redis.Db.StringSet(value.FullKey, JsonConvert.SerializeObject(value));
+                redisClient.Db.StringSet(value.FullKey, JsonConvert.SerializeObject(value));
+                value.Cookie++;
             }
             Console.WriteLine("natural redis api sync: {0}", (System.DateTime.Now.Subtract(start).TotalSeconds));
             start = System.DateTime.Now;
 
-            Parallel.For(0, 100,
-                               index =>
-                               {
-                                   redis.Db.StringSet(value.FullKey, JsonConvert.SerializeObject(value));
-                               });
+            for (var i = 0; i < 100; i++)
+            {
+                redisClient.Db.StringSetAsync(value.FullKey, JsonConvert.SerializeObject(value));
+                value.Cookie++;
+            }
             Console.WriteLine("natural redis api async: {0}", (System.DateTime.Now.Subtract(start).TotalSeconds));
         }
         [Fact]
@@ -148,13 +151,23 @@ namespace UniSpy.Redis.Test
         public void CountTest()
         {
             var redis = new RedisClient();
-            // Given
-            // var data2 = redis.Values.Count(k => k.Cookie == 0);
-            var data3 = redis.Context.First(k => k.Cookie == 0);
+            var data1 = redis.Context.Count();
+            var data2 = redis.Context.Count(k => k.Cookie == 134);
+            Assert.Throws<InvalidOperationException>(() => redis.Context.First(k => k.Cookie == 134));
             var data4 = redis.Context.Where(k => k.Cookie == 0).First();
-            // When
+        }
+        [Fact]
+        public void SearchKeyBuild()
+        {
+            // Given
+            var user1 = new UserInfo() { Cookie = 0 };
+            var key1 = user1.SearchKey;
 
-            // Then
+            var user2 = new UserInfo() { ServerID = Guid.NewGuid(), Cookie = 0 };
+            var key2 = user2.SearchKey;
+
+            var user3 = new UserInfo() { ServerID = Guid.NewGuid(), Cookie = 0, UserName = "xiaojiuwo", RemoteEndPoint = "192.168.1.1" };
+            var key3 = user3.SearchKey;
         }
     }
 }

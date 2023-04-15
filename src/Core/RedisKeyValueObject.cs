@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace UniSpyServer.LinqToRedis
+namespace UniSpy.LinqToRedis
 {
     public abstract record RedisKeyValueObject : IRedisKey
     {
@@ -42,26 +43,24 @@ namespace UniSpyServer.LinqToRedis
         {
             ExpireTime = expireTime;
         }
+       
         private string BuildFullKey()
         {
             string fullKey = null;
             var properties = GetType().GetProperties().Where(p => p.GetCustomAttributes(typeof(RedisKeyAttribute), true).Select(a => a is RedisKeyAttribute).Any()).ToList();
-            if (properties.Count() == 0)
-            {
-                throw new ArgumentNullException($"The RedisKeyValueObject:{this.GetType().Name} must have a key");
-            }
+
             foreach (var property in properties)
             {
                 // if (!_supportedTypes.Contains(property.PropertyType))
                 // {
                 //     throw new NotSupportedException($"The complex type:{property.PropertyType} is not supported");
                 // }
-                if (property.GetValue(this) == null)
+                if (property.GetValue(this) is null)
                 {
                     throw new ArgumentNullException($"{property.Name} is null when building full key.");
                 }
                 var keyValueStr = $"{property.Name}={property.GetValue(this)}";
-                if (fullKey == null)
+                if (fullKey is null)
                 {
                     fullKey = $"{keyValueStr}";
                 }
@@ -75,24 +74,34 @@ namespace UniSpyServer.LinqToRedis
         private string BuildSearchKey()
         {
             var builder = new StringBuilder();
-            var properties = GetType().GetProperties().Where(p => p.GetCustomAttributes(typeof(RedisKeyAttribute), false).Where(a => a is RedisKeyAttribute).Any());
+            var properties = GetType().GetProperties().Where(p => p.GetCustomAttributes(typeof(RedisKeyAttribute), false).Where(a => a is RedisKeyAttribute).Any()).ToList();
             if (properties.Count() == 0)
             {
                 throw new ArgumentNullException($"The RedisKeyValueObject:{this.GetType().Name} must have a key");
             }
-            builder.Append("*");
 
+
+            var propKVList = new List<KeyValuePair<string, object>>();
             foreach (var property in properties)
             {
-                if (property.GetValue(this) == null)
+                propKVList.Add(new KeyValuePair<string, object>(property.Name, property.GetValue(this)));
+            }
+
+            foreach (var item in propKVList)
+            {
+                if (item.Value is null)
                 {
-                    continue;
+                    builder.Append($"{item.Key}=*");
                 }
                 else
                 {
-                    builder.Append($"{property.Name}={property.GetValue(this)}");
+                    builder.Append($"{item.Key}={item.Value}");
                 }
-                builder.Append("*");
+
+                if (item.Key != propKVList.Last().Key)
+                {
+                    builder.Append(":");
+                }
             }
             return builder.ToString();
         }

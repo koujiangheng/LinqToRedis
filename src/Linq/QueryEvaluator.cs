@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace UniSpyServer.LinqToRedis.Linq
+namespace UniSpy.LinqToRedis.Linq
 {
     public static class QueryEvaluator
     {
@@ -39,7 +39,7 @@ namespace UniSpyServer.LinqToRedis.Linq
 
             public override Expression Visit(Expression node)
             {
-                if (node == null)
+                if (node is null)
                 {
                     return null;
                 }
@@ -81,7 +81,7 @@ namespace UniSpyServer.LinqToRedis.Linq
             }
             public override Expression Visit(Expression node)
             {
-                if (node != null)
+                if (node is not null)
                 {
                     bool saveCannotBeEvaluated = this.cannotBeEvaluated;
                     this.cannotBeEvaluated = false;

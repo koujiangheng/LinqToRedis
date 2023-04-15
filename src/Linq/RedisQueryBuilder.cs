@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace UniSpyServer.LinqToRedis.Linq
+namespace UniSpy.LinqToRedis.Linq
 {
     /// <summary>
     /// Provide high level API for redis query building
@@ -55,24 +55,32 @@ namespace UniSpyServer.LinqToRedis.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
+            Expression correctNode;
+            if (node.Arguments.Count > 1)
+            {
+                // this indicate the first linq expression
+                if (node.Arguments[0].Type.GenericTypeArguments.FirstOrDefault().IsSubclassOf(typeof(RedisKeyValueObject)))
+                {
+                    correctNode = node.Arguments[1];
+                }
+                else
+                {
+                    correctNode = node.Arguments[0];
+                }
+            }
+            else
+            {
+                correctNode = node.Arguments[0];
+            }
+
+
             switch (node.Method.Name)
             {
                 case "Where":
-                    Visit(node.Arguments[1]);
-                    break;
                 case "Count":
                 case "First":
                 case "FirstOrDefault":
-                    if (node.Arguments.Count == 1)
-                    {
-                        // FirstOrDefault() is called at the end of the query
-                        Visit(node.Arguments[0]);
-                    }
-                    else
-                    {
-                        // FirstOrDefault() is called at the start of the query
-                        Visit(node.Arguments[1]);
-                    }
+                    Visit(correctNode);
                     break;
                 default:
                     throw new NotSupportedException(string.Format("The method '{0}' is not supported", node.Method.Name));
@@ -116,7 +124,7 @@ namespace UniSpyServer.LinqToRedis.Linq
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            if (node.Value == null)
+            if (node.Value is null)
             {
                 throw new NotSupportedException("The constant must have value");
             }
